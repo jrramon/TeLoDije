@@ -1,5 +1,7 @@
 # TeLoDije - App de Predicciones Sociales
 
+NOTA: APP REALIZADA EN EL TALLER DE COCREAR CON IA. Ni he visto el código 😅
+
 Una aplicación Rails completa para crear, votar y comentar predicciones con funcionalidades sociales y gamificación.
 
 ## 🎯 Características
