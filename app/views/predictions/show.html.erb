@@ -1,0 +1,445 @@
+<div class="container">
+  <div class="prediction-detail">
+    <div class="prediction-header">
+      <h1><%= @prediction.title %></h1>
+      <div class="prediction-meta">
+        <span class="author">por <%= @prediction.user.username %></span>
+        <span class="date">Creada: <%= @prediction.created_at.strftime("%d/%m/%Y") %></span>
+        <span class="resolution">Resuelve: <%= @prediction.resolution_date.strftime("%d/%m/%Y a las %H:%M") %></span>
+      </div>
+    </div>
+    
+    <div class="prediction-content">
+      <h2>Pregunta</h2>
+      <p><%= @prediction.question %></p>
+      
+      <% if @prediction.source.present? %>
+        <div class="source-section">
+          <h3>Fuente de verificación</h3>
+          <p><%= link_to @prediction.source, @prediction.source, target: "_blank" %></p>
+        </div>
+      <% end %>
+      
+      <% if @prediction.hint.present? %>
+        <div class="hint-section">
+          <h3>Pista o contexto</h3>
+          <p><%= @prediction.hint %></p>
+        </div>
+      <% end %>
+    </div>
+    
+    <div class="voting-section">
+      <h2>Votación Actual</h2>
+      
+      <div class="vote-stats">
+        <div class="vote-bar-large">
+          <div class="yes-bar-large" style="width: <%= @prediction.yes_percentage %>%">
+            <span class="vote-text">SÍ: <%= @prediction.yes_percentage %>%</span>
+            <span class="vote-points">(<%= @prediction.yes_votes %> pts)</span>
+          </div>
+          <div class="no-bar-large" style="width: <%= @prediction.no_percentage %>%">
+            <span class="vote-text">NO: <%= @prediction.no_percentage %>%</span>
+            <span class="vote-points">(<%= @prediction.no_votes %> pts)</span>
+          </div>
+        </div>
+        
+        <div class="total-stats">
+          <span>Total votos: <%= @prediction.total_votes %></span>
+          <span>Total puntos: <%= @prediction.total_points %></span>
+        </div>
+      </div>
+      
+      <% if logged_in? %>
+        <% if @prediction.can_be_voted_on? %>
+          <% if @vote %>
+            <div class="your-vote">
+              <h3>Tu voto actual</h3>
+              <p>Has votado: <strong><%= @vote.outcome ? 'SÍ' : 'NO' %></strong> con <%= @vote.points %> puntos</p>
+              <%= button_to "Cambiar voto", prediction_vote_path(@prediction, @vote), method: :delete, class: "btn btn-warning" %>
+            </div>
+          <% else %>
+            <div class="vote-form">
+              <h3>Votar en esta predicción</h3>
+              <p>Tienes <%= current_user.points %> puntos disponibles</p>
+              
+              <%= form_with model: [@prediction, Vote.new], local: true do |form| %>
+                <div class="vote-options">
+                  <div class="vote-option">
+                    <%= form.radio_button :outcome, true, id: 'vote_yes' %>
+                    <%= form.label :outcome_true, "SÍ se cumplirá", for: 'vote_yes' %>
+                  </div>
+                  <div class="vote-option">
+                    <%= form.radio_button :outcome, false, id: 'vote_no' %>
+                    <%= form.label :outcome_false, "NO se cumplirá", for: 'vote_no' %>
+                  </div>
+                </div>
+                
+                <div class="points-selection">
+                  <%= form.label :points, "Puntos a apostar (1-10):" %>
+                  <%= form.select :points, options_for_select((1..[10, current_user.points].min).map { |p| [p, p] }), {}, { class: 'points-select' } %>
+                </div>
+                
+                <%= form.submit "Votar", class: "btn btn-primary" %>
+              <% end %>
+            </div>
+          <% end %>
+        <% else %>
+          <div class="voting-closed">
+            <h3>Votación cerrada</h3>
+            <p>Esta predicción ya no acepta votos.</p>
+          </div>
+        <% end %>
+      <% else %>
+        <div class="login-prompt">
+          <p><%= link_to "Inicia sesión", login_path %> para votar en esta predicción</p>
+        </div>
+      <% end %>
+    </div>
+    
+    <!-- Comments Section -->
+    <div class="comments-section">
+      <h2>💬 Comentarios (<%= @prediction.comments.count %>)</h2>
+      
+      <% if logged_in? %>
+        <div class="comment-form">
+          <%= form_with model: [@prediction, Comment.new], local: true do |form| %>
+            <div class="form-group">
+              <%= form.text_area :content, placeholder: "Escribe tu comentario...", rows: 3, required: true %>
+            </div>
+            <%= form.submit "Comentar", class: "btn btn-primary" %>
+          <% end %>
+        </div>
+      <% end %>
+      
+      <div class="comments-list">
+        <% @prediction.comments.recent.each do |comment| %>
+          <div class="comment">
+            <div class="comment-header">
+              <span class="comment-author"><%= link_to comment.user.username, profile_path(comment.user) %></span>
+              <span class="comment-date"><%= comment.created_at.strftime("%d/%m/%Y %H:%M") %></span>
+              <% if logged_in? && comment.user == current_user %>
+                <%= button_to "Eliminar", prediction_comment_path(@prediction, comment), method: :delete, class: "btn-delete", data: { confirm: "¿Eliminar comentario?" } %>
+              <% end %>
+            </div>
+            <div class="comment-content">
+              <%= comment.content %>
+            </div>
+          </div>
+        <% end %>
+        
+        <% if @prediction.comments.empty? %>
+          <p class="no-comments">No hay comentarios aún. ¡Sé el primero en comentar!</p>
+        <% end %>
+      </div>
+    </div>
+    
+    <div class="actions">
+      <%= link_to "← Volver a predicciones", predictions_path, class: "btn btn-secondary" %>
+      <% if logged_in? && @prediction.user == current_user %>
+        <%= link_to "Editar", edit_prediction_path(@prediction), class: "btn btn-primary" %>
+        <%= button_to "Eliminar", prediction_path(@prediction), method: :delete, class: "btn btn-danger", data: { confirm: "¿Estás seguro?" } %>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<style>
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    background-color: #f5f5f5;
+  }
+  
+  .container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  .prediction-detail {
+    background: white;
+    padding: 40px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  }
+  
+  .prediction-header h1 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #333;
+    font-size: 2em;
+  }
+  
+  .prediction-meta {
+    display: flex;
+    gap: 20px;
+    color: #666;
+    font-size: 0.9em;
+    margin-bottom: 30px;
+  }
+  
+  .prediction-content {
+    margin-bottom: 40px;
+  }
+  
+  .prediction-content h2 {
+    color: #333;
+    margin-bottom: 10px;
+  }
+  
+  .prediction-content p {
+    color: #555;
+    margin-bottom: 20px;
+  }
+  
+  .source-section,
+  .hint-section {
+    margin-top: 20px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 4px;
+  }
+  
+  .source-section h3,
+  .hint-section h3 {
+    margin-top: 0;
+    color: #333;
+    font-size: 1.1em;
+  }
+  
+  .voting-section {
+    margin-bottom: 40px;
+  }
+  
+  .voting-section h2 {
+    color: #333;
+    margin-bottom: 20px;
+  }
+  
+  .vote-stats {
+    margin-bottom: 30px;
+  }
+  
+  .vote-bar-large {
+    display: flex;
+    height: 50px;
+    border-radius: 25px;
+    overflow: hidden;
+    border: 2px solid #ddd;
+    margin-bottom: 15px;
+  }
+  
+  .yes-bar-large,
+  .no-bar-large {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    min-width: 80px;
+    position: relative;
+  }
+  
+  .yes-bar-large {
+    background: #28a745;
+  }
+  
+  .no-bar-large {
+    background: #dc3545;
+  }
+  
+  .vote-text {
+    font-size: 14px;
+  }
+  
+  .vote-points {
+    font-size: 12px;
+    opacity: 0.9;
+  }
+  
+  .total-stats {
+    display: flex;
+    justify-content: space-between;
+    color: #666;
+    font-size: 0.9em;
+  }
+  
+  .your-vote,
+  .vote-form,
+  .voting-closed,
+  .login-prompt {
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #f8f9fa;
+  }
+  
+  .your-vote h3,
+  .vote-form h3,
+  .voting-closed h3 {
+    margin-top: 0;
+    color: #333;
+  }
+  
+  .vote-options {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+  
+  .vote-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .points-selection {
+    margin-bottom: 20px;
+  }
+  
+  .points-selection label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+  }
+  
+  .points-select {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+  }
+  
+  .actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+  }
+  
+  .btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 14px;
+    cursor: pointer;
+    display: inline-block;
+    text-align: center;
+  }
+  
+  .btn-primary {
+    background: #007bff;
+    color: white;
+  }
+  
+  .btn-secondary {
+    background: #6c757d;
+    color: white;
+  }
+  
+  .btn-warning {
+    background: #ffc107;
+    color: #212529;
+  }
+  
+  .btn-danger {
+    background: #dc3545;
+    color: white;
+  }
+  
+  .btn:hover {
+    opacity: 0.9;
+  }
+  
+  /* Comments Styles */
+  .comments-section {
+    margin-top: 40px;
+    padding-top: 30px;
+    border-top: 1px solid #ddd;
+  }
+  
+  .comments-section h2 {
+    color: #333;
+    margin-bottom: 20px;
+  }
+  
+  .comment-form {
+    margin-bottom: 30px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 8px;
+  }
+  
+  .comment-form .form-group {
+    margin-bottom: 15px;
+  }
+  
+  .comment-form textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    font-family: inherit;
+    resize: vertical;
+  }
+  
+  .comments-list {
+    space-y: 20px;
+  }
+  
+  .comment {
+    padding: 15px;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    background: white;
+    margin-bottom: 15px;
+  }
+  
+  .comment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  
+  .comment-author {
+    font-weight: 600;
+    color: #007bff;
+  }
+  
+  .comment-author a {
+    color: inherit;
+    text-decoration: none;
+  }
+  
+  .comment-date {
+    color: #666;
+    font-size: 0.9em;
+  }
+  
+  .comment-content {
+    color: #333;
+    line-height: 1.5;
+  }
+  
+  .btn-delete {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+  }
+  
+  .no-comments {
+    text-align: center;
+    color: #666;
+    font-style: italic;
+    padding: 20px;
+  }
+</style> 

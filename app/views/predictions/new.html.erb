@@ -1,0 +1,176 @@
+<div class="container">
+  <div class="form-container">
+    <h1>Crear Nueva Predicción</h1>
+    
+    <%= form_with model: @prediction, local: true do |form| %>
+      <% if @prediction.errors.any? %>
+        <div class="error-messages">
+          <h2>Errores:</h2>
+          <ul>
+            <% @prediction.errors.full_messages.each do |message| %>
+              <li><%= message %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+      
+      <div class="form-group">
+        <%= form.label :title, "Título de la predicción" %>
+        <%= form.text_field :title, required: true, placeholder: "Ej: ¿Apple lanzará el iPhone 16 en septiembre?" %>
+        <small>Un título claro y específico que resuma la predicción</small>
+      </div>
+      
+      <div class="form-group">
+        <%= form.label :question, "Pregunta de la predicción" %>
+        <%= form.text_area :question, required: true, rows: 4, placeholder: "Describe la predicción en detalle. Debe ser una pregunta que se pueda responder con SÍ o NO." %>
+        <small>Describe claramente qué se está prediciendo y cómo se verificará</small>
+      </div>
+      
+      <div class="form-group">
+        <%= form.label :resolution_date, "Fecha de resolución" %>
+        <%= form.datetime_local_field :resolution_date, required: true %>
+        <small>Cuándo se resolverá esta predicción (debe ser en el futuro)</small>
+      </div>
+      
+      <div class="form-group">
+        <%= form.label :source, "Fuente de verificación (opcional)" %>
+        <%= form.text_field :source, placeholder: "URL o fuente donde se podrá verificar el resultado" %>
+        <small>Enlace o referencia donde se podrá confirmar el resultado</small>
+      </div>
+      
+      <div class="form-group">
+        <%= form.label :category_id, "Categoría" %>
+        <%= form.select :category_id, 
+            options_from_collection_for_select(@categories, :id, :display_name, @prediction.category_id),
+            { prompt: "Selecciona una categoría" },
+            { class: "form-select" } %>
+        <small>Selecciona la categoría que mejor describe tu predicción</small>
+      </div>
+      
+      <div class="form-group">
+        <%= form.label :hint, "Pista o contexto (opcional)" %>
+        <%= form.text_area :hint, rows: 3, placeholder: "Información adicional, contexto o pistas que ayuden a evaluar la predicción" %>
+        <small>Información adicional que ayude a otros a evaluar la predicción</small>
+      </div>
+      
+      <div class="form-actions">
+        <%= form.submit "Crear Predicción", class: "btn btn-primary" %>
+        <%= link_to "Cancelar", predictions_path, class: "btn btn-secondary" %>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<style>
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    background-color: #f5f5f5;
+  }
+  
+  .container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  .form-container {
+    background: white;
+    padding: 40px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  }
+  
+  .form-container h1 {
+    margin-top: 0;
+    margin-bottom: 30px;
+    color: #333;
+    text-align: center;
+  }
+  
+  .error-messages {
+    background: #f8d7da;
+    color: #721c24;
+    padding: 15px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+  }
+  
+  .error-messages h2 {
+    font-size: 16px;
+    margin-bottom: 10px;
+  }
+  
+  .error-messages ul {
+    margin: 0;
+    padding-left: 20px;
+  }
+  
+  .form-group {
+    margin-bottom: 25px;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #333;
+  }
+  
+  .form-group input,
+  .form-group textarea,
+  .form-group select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+    box-sizing: border-box;
+    font-family: inherit;
+  }
+  
+  .form-group textarea {
+    resize: vertical;
+  }
+  
+  .form-group small {
+    display: block;
+    margin-top: 5px;
+    color: #666;
+    font-size: 0.9em;
+  }
+  
+  .form-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 30px;
+  }
+  
+  .btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 16px;
+    cursor: pointer;
+    display: inline-block;
+    text-align: center;
+  }
+  
+  .btn-primary {
+    background: #007bff;
+    color: white;
+  }
+  
+  .btn-secondary {
+    background: #6c757d;
+    color: white;
+  }
+  
+  .btn:hover {
+    opacity: 0.9;
+  }
+</style> 

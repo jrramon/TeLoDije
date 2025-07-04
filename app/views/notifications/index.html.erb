@@ -1,0 +1,289 @@
+<div class="notifications-page">
+  <div class="page-header">
+    <div class="header-content">
+      <h1>🔔 Notificaciones</h1>
+      <p class="subtitle">Mantente al día con la actividad de la comunidad</p>
+    </div>
+  </div>
+
+  <div class="notifications-container">
+    <% if @notifications.any? %>
+      <div class="notifications-header">
+        <div class="notifications-stats">
+          <span class="stat-item">
+            <span class="stat-number"><%= @notifications.unread.count %></span>
+            <span class="stat-label">No leídas</span>
+          </span>
+          <span class="stat-item">
+            <span class="stat-number"><%= @notifications.count %></span>
+            <span class="stat-label">Total</span>
+          </span>
+        </div>
+        
+        <% if @notifications.unread.any? %>
+          <%= button_to "Marcar todas como leídas", mark_all_as_read_notifications_path, 
+              method: :patch, class: "btn btn-secondary" %>
+        <% end %>
+      </div>
+
+      <div class="notifications-list">
+        <% @notifications.each do |notification| %>
+          <div class="notification-item <%= 'unread' unless notification.read? %>">
+            <div class="notification-icon">
+              <% case notification.notification_type %>
+              <% when 'comment' %>
+                💬
+              <% when 'follow' %>
+                👥
+              <% when 'vote' %>
+                🗳️
+              <% else %>
+                🔔
+              <% end %>
+            </div>
+            
+            <div class="notification-content">
+              <div class="notification-header">
+                <h3 class="notification-title"><%= notification.title %></h3>
+                <span class="notification-time">
+                  <%= time_ago_in_words(notification.created_at) %> atrás
+                </span>
+              </div>
+              
+              <p class="notification-message"><%= notification.message %></p>
+              
+              <div class="notification-actions">
+                <% unless notification.read? %>
+                  <%= button_to "Marcar como leída", mark_as_read_notification_path(notification), 
+                      method: :patch, class: "btn btn-sm btn-primary" %>
+                <% end %>
+                
+                <% if notification.reference %>
+                  <%= link_to "Ver", notification_path(notification), class: "btn btn-sm btn-secondary" %>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="empty-state">
+        <div class="empty-icon">🔔</div>
+        <h2>No hay notificaciones</h2>
+        <p>¡Interactúa con la comunidad para recibir notificaciones!</p>
+        <%= link_to "Ver predicciones", predictions_path, class: "btn btn-primary" %>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<style>
+  .notifications-page {
+    max-width: 100%;
+  }
+  
+  .page-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    padding: 2rem;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    border-radius: var(--radius-xl);
+    color: white;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .page-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/><circle cx="10" cy="60" r="0.5" fill="white" opacity="0.1"/><circle cx="90" cy="40" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+    opacity: 0.3;
+  }
+  
+  .header-content {
+    position: relative;
+    z-index: 1;
+  }
+  
+  .page-header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  
+  .subtitle {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    font-weight: 400;
+  }
+  
+  .notifications-container {
+    background: var(--bg-primary);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+  }
+  
+  .notifications-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 2rem;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+  }
+  
+  .notifications-stats {
+    display: flex;
+    gap: 2rem;
+  }
+  
+  .stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .stat-number {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+  }
+  
+  .stat-label {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+  }
+  
+  .notifications-list {
+    max-height: 600px;
+    overflow-y: auto;
+  }
+  
+  .notification-item {
+    display: flex;
+    gap: 1rem;
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid var(--border-light);
+    transition: var(--transition);
+  }
+  
+  .notification-item:hover {
+    background: var(--bg-secondary);
+  }
+  
+  .notification-item.unread {
+    background: linear-gradient(90deg, rgba(99, 102, 241, 0.05) 0%, transparent 100%);
+    border-left: 4px solid var(--primary-color);
+  }
+  
+  .notification-icon {
+    font-size: 1.5rem;
+    width: 3rem;
+    height: 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-lg);
+    flex-shrink: 0;
+  }
+  
+  .notification-content {
+    flex: 1;
+  }
+  
+  .notification-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.5rem;
+  }
+  
+  .notification-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+  }
+  
+  .notification-time {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+  }
+  
+  .notification-message {
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+    line-height: 1.5;
+  }
+  
+  .notification-actions {
+    display: flex;
+    gap: 0.75rem;
+  }
+  
+  .btn-sm {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+  
+  .empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+  }
+  
+  .empty-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+  }
+  
+  .empty-state h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+  }
+  
+  .empty-state p {
+    color: var(--text-secondary);
+    margin-bottom: 2rem;
+    font-size: 1.1rem;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .page-header h1 {
+      font-size: 2rem;
+    }
+    
+    .notifications-header {
+      flex-direction: column;
+      gap: 1rem;
+      text-align: center;
+    }
+    
+    .notifications-stats {
+      justify-content: center;
+    }
+    
+    .notification-item {
+      padding: 1rem;
+    }
+    
+    .notification-header {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    
+    .notification-actions {
+      flex-direction: column;
+    }
+  }
+</style> 

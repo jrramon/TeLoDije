@@ -1,0 +1,467 @@
+<div class="rankings-page">
+  <div class="page-header">
+    <div class="header-content">
+      <h1>🏆 Rankings y Clasificaciones</h1>
+      <p class="subtitle">Descubre a los mejores predictores de la comunidad</p>
+    </div>
+  </div>
+  
+  <div class="rankings-grid">
+    <!-- Top Points -->
+    <div class="ranking-card">
+      <div class="card-header">
+        <div class="card-icon">💰</div>
+        <h2>Más Puntos</h2>
+      </div>
+      <div class="ranking-list">
+        <% @top_points.each_with_index do |user, index| %>
+          <div class="ranking-item <%= index < 3 ? "top-#{index + 1}" : "" %>">
+            <div class="rank-number"><%= index + 1 %></div>
+            <div class="user-info">
+              <div class="username"><%= link_to user.username, profile_path(user) %></div>
+              <div class="user-stats">
+                <span class="title"><%= user.title %></span>
+                <span class="points"><%= user.points %> pts</span>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+    
+    <!-- Top Accuracy -->
+    <div class="ranking-card">
+      <div class="card-header">
+        <div class="card-icon">🎯</div>
+        <h2>Mejor Precisión</h2>
+      </div>
+      <div class="ranking-list">
+        <% @top_accuracy.each_with_index do |user, index| %>
+          <div class="ranking-item <%= index < 3 ? "top-#{index + 1}" : "" %>">
+            <div class="rank-number"><%= index + 1 %></div>
+            <div class="user-info">
+              <div class="username"><%= link_to user.username, profile_path(user) %></div>
+              <div class="user-stats">
+                <span class="accuracy"><%= user.accuracy_percentage %>%</span>
+                <span class="predictions">(<%= user.total_predictions %> pred)</span>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+    
+    <!-- Top Streaks -->
+    <div class="ranking-card">
+      <div class="card-header">
+        <div class="card-icon">🔥</div>
+        <h2>Mejores Rachas</h2>
+      </div>
+      <div class="ranking-list">
+        <% @top_streaks.each_with_index do |user, index| %>
+          <div class="ranking-item <%= index < 3 ? "top-#{index + 1}" : "" %>">
+            <div class="rank-number"><%= index + 1 %></div>
+            <div class="user-info">
+              <div class="username"><%= link_to user.username, profile_path(user) %></div>
+              <div class="user-stats">
+                <span class="streak"><%= user.best_streak %> aciertos</span>
+                <span class="current">Actual: <%= user.current_streak %></span>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+    
+    <!-- Top Predictors -->
+    <div class="ranking-card">
+      <div class="card-header">
+        <div class="card-icon">📝</div>
+        <h2>Más Predicciones</h2>
+      </div>
+      <div class="ranking-list">
+        <% @top_predictors.each_with_index do |user, index| %>
+          <div class="ranking-item <%= index < 3 ? "top-#{index + 1}" : "" %>">
+            <div class="rank-number"><%= index + 1 %></div>
+            <div class="user-info">
+              <div class="username"><%= link_to user.username, profile_path(user) %></div>
+              <div class="user-stats">
+                <span class="predictions-count"><%= user.predictions.count %> predicciones</span>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Recent Badges -->
+  <div class="badges-section">
+    <div class="section-header">
+      <h2>🏅 Badges Recientes</h2>
+      <p>Últimos logros de la comunidad</p>
+    </div>
+    <div class="badges-grid">
+      <% @recent_badges.each do |user_badge| %>
+        <div class="badge-item">
+          <div class="badge-icon"><%= user_badge.badge.icon %></div>
+          <div class="badge-info">
+            <div class="badge-name"><%= user_badge.badge.name %></div>
+            <div class="badge-user"><%= link_to user_badge.user.username, profile_path(user_badge.user) %></div>
+            <div class="badge-date"><%= user_badge.earned_at.strftime("%d/%m/%Y") %></div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+  
+  <div class="actions">
+    <%= link_to "← Volver a predicciones", predictions_path, class: "btn btn-secondary" %>
+  </div>
+</div>
+
+<style>
+  .rankings-page {
+    max-width: 100%;
+  }
+  
+  .page-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    padding: 2rem;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    border-radius: var(--radius-xl);
+    color: white;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .page-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/><circle cx="10" cy="60" r="0.5" fill="white" opacity="0.1"/><circle cx="90" cy="40" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+    opacity: 0.3;
+  }
+  
+  .header-content {
+    position: relative;
+    z-index: 1;
+  }
+  
+  .page-header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  
+  .subtitle {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    font-weight: 400;
+  }
+  
+  .rankings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
+  }
+  
+  .ranking-card {
+    background: var(--bg-primary);
+    border-radius: var(--radius-xl);
+    padding: 2rem;
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--border-color);
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .ranking-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+  }
+  
+  .ranking-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-xl);
+  }
+  
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--border-light);
+  }
+  
+  .card-icon {
+    font-size: 2rem;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+  }
+  
+  .card-header h2 {
+    margin: 0;
+    color: var(--text-primary);
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+  
+  .ranking-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .ranking-item {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    border-radius: var(--radius-lg);
+    background: var(--bg-secondary);
+    transition: var(--transition);
+    border: 1px solid var(--border-light);
+  }
+  
+  .ranking-item:hover {
+    transform: translateX(8px);
+    box-shadow: var(--shadow-md);
+  }
+  
+  .ranking-item.top-1 {
+    background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+    border-color: #fbbf24;
+  }
+  
+  .ranking-item.top-2 {
+    background: linear-gradient(135deg, #c0c0c0 0%, #e5e5e5 100%);
+    border-color: #d1d5db;
+  }
+  
+  .ranking-item.top-3 {
+    background: linear-gradient(135deg, #cd7f32 0%, #daa520 100%);
+    border-color: #f59e0b;
+  }
+  
+  .rank-number {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-right: 1rem;
+    min-width: 2rem;
+    text-align: center;
+  }
+  
+  .user-info {
+    flex: 1;
+  }
+  
+  .username {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+    font-size: 1rem;
+  }
+  
+  .username a {
+    color: inherit;
+    text-decoration: none;
+    transition: var(--transition);
+  }
+  
+  .username a:hover {
+    color: var(--primary-color);
+  }
+  
+  .user-stats {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    flex-wrap: wrap;
+  }
+  
+  .user-stats span {
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    font-size: 0.8rem;
+  }
+  
+  .title {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    color: white;
+  }
+  
+  .points {
+    background: linear-gradient(135deg, var(--success-color) 0%, #059669 100%);
+    color: white;
+  }
+  
+  .accuracy {
+    background: linear-gradient(135deg, var(--info-color) 0%, #0891b2 100%);
+    color: white;
+  }
+  
+  .streak {
+    background: linear-gradient(135deg, var(--danger-color) 0%, #dc2626 100%);
+    color: white;
+  }
+  
+  .current {
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
+  }
+  
+  .predictions, .predictions-count {
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
+  }
+  
+  .badges-section {
+    background: var(--bg-primary);
+    border-radius: var(--radius-xl);
+    padding: 2rem;
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--border-color);
+    margin-bottom: 2rem;
+  }
+  
+  .section-header {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  
+  .section-header h2 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+  }
+  
+  .section-header p {
+    color: var(--text-secondary);
+    font-size: 1rem;
+  }
+  
+  .badges-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+  }
+  
+  .badge-item {
+    display: flex;
+    align-items: center;
+    padding: 1.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    background: var(--bg-secondary);
+    transition: var(--transition);
+  }
+  
+  .badge-item:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+  
+  .badge-icon {
+    font-size: 2.5rem;
+    margin-right: 1rem;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+  }
+  
+  .badge-info {
+    flex: 1;
+  }
+  
+  .badge-name {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+  }
+  
+  .badge-user {
+    font-size: 0.875rem;
+    margin-bottom: 0.25rem;
+  }
+  
+  .badge-user a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+  }
+  
+  .badge-user a:hover {
+    text-decoration: underline;
+  }
+  
+  .badge-date {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+  
+  .actions {
+    text-align: center;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .rankings-grid {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+    
+    .ranking-card {
+      padding: 1.5rem;
+    }
+    
+    .page-header h1 {
+      font-size: 2rem;
+    }
+    
+    .badges-grid {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+    
+    .user-stats {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+  }
+  
+  /* Animations */
+  .ranking-card {
+    animation: fadeInUp 0.6s ease-out;
+  }
+  
+  .ranking-card:nth-child(1) { animation-delay: 0.1s; }
+  .ranking-card:nth-child(2) { animation-delay: 0.2s; }
+  .ranking-card:nth-child(3) { animation-delay: 0.3s; }
+  .ranking-card:nth-child(4) { animation-delay: 0.4s; }
+  
+  .badge-item {
+    animation: fadeInUp 0.6s ease-out;
+  }
+  
+  .badge-item:nth-child(1) { animation-delay: 0.5s; }
+  .badge-item:nth-child(2) { animation-delay: 0.6s; }
+  .badge-item:nth-child(3) { animation-delay: 0.7s; }
+  .badge-item:nth-child(4) { animation-delay: 0.8s; }
+  .badge-item:nth-child(5) { animation-delay: 0.9s; }
+  .badge-item:nth-child(6) { animation-delay: 1.0s; }
+</style>

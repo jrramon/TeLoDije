@@ -1,0 +1,9 @@
+#!/usr/bin/env ruby
+# This script resolves pending predictions
+# Can be run by cron: 0 * * * * /path/to/bin/resolve_predictions
+
+require_relative '../config/environment'
+
+puts "Resolving predictions at #{Time.current}"
+PredictionResolver.resolve_pending_predictions
+puts "Done!" 
